@@ -1,0 +1,39 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pr:
+  branches:
+    include:
+      - develop
+
+variables:
+  projectNamePrefix: 'swallow'
+
+stages:
+- stage: Build
+  jobs:
+  - job: build_job
+    pool:
+      vmImage: 'ubuntu-latest'
+    variables:
+      location: 'Japan East'
+    steps:
+    - script: |
+        echo '##vso[task.setvariable variable=ProjectName]$(projectNamePrefix)-$(Build.SourceBranchName)-ci'
+      displayName: 'Set ProjectName'
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(ProjectName)
+        location: $(location)
+        templateLocation: 'Linked artifact'
+        csmFile: azuredeploy.json
+        csmParametersFile: parameters.minimum.json
+        overrideParameters: '-projectName $(ProjectName)'
+        deploymentMode: 'Incremental'
+        deploymentOutputs: DeployedOutput
+    - script: |
+        echo $(DeployedOutput)
