@@ -131,7 +131,7 @@
   "outputs": {
     "subscriptionId": {
       "type": "string",
-      "value": "[subscription().id]"
+      "value": "[subscription().subscriptionId]"
     },
     "resourceGroupName": {
       "type": "string",

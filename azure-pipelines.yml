@@ -36,6 +36,10 @@ stages:
         deploymentMode: 'Incremental'
         deploymentOutputs: DeployOutput
     - script: |
-        echo '##vso[task.setvariable variable=DeployOutputObj]($(DeployOutput) | ConvertFrom-Json)'
+        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID](echo $(DeployOutput) | jq \'.subscriptionId.value\')'
+        echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME](echo $(DeployOutput) | jq \'.resourceGroupName.value\')'
+        echo '##vso[task.setvariable variable=FUNCTION_NAME](echo $(DeployOutput) | jq \'.functionName.value\')'
     - script: |
-        echo $(DeployOutputObj)
+        echo $SUBSCRIPTION_NAME
+        echo $RESOURCE_GROUP_NAME
+        echo $FUNCTION_NAME
