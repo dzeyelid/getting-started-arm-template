@@ -21,14 +21,3 @@ stages:
           location: 'Japan East'
         steps:
         - script: echo 'Hello world!'
-        - task: AzureResourceGroupDeployment@2
-          inputs:
-            azureSubscription: 'Connected Azure Subscription'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: $(resourceGroupName)
-            location: $(location)
-            templateLocation: 'Linked artifact'
-            csmFile: azuredeploy.json
-            csmParametersFile: parameters.minimum.json
-            overrideParameters: '-projectName $(projectName)'
-            deploymentMode: 'Incremental'
