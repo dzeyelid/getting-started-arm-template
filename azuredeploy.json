@@ -1,0 +1,131 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
+  "contentVersion": "0.0.1.0",
+  "parameters": {
+    "projectName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "storageSkuName": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Standard_ZRS",
+        "Premium_LRS",
+        "Premium_ZRS",
+        "Standard_GZRS",
+        "Standard_RAGZRS"
+      ]
+    },
+    "appServiceSkuName": {
+      "type": "string",
+      "allowedValues": [
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "P1V2",
+        "P2V2",
+        "P3V2",
+        "PC2",
+        "PC3",
+        "PC4",
+        "S1",
+        "S2",
+        "S3"
+      ]
+    }
+  },
+  "variables": {
+    "location": "[if(equals(parameters('location'), ''), resourceGroup().location, parameters('location'))]",
+    "storageName": "[uniqueString(parameters('projectName'))]",
+    "appServiceName": "[concat(parameters('projectName'), '-plan')]",
+    "appInsightsName": "[concat(parameters('projectName'), '-insights')]",
+    "functionName": "[concat(parameters('projectName'), '-func')]"
+  },
+  "resources": [
+    {
+
+      "name": "[variables('storageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-04-01",
+      "sku": {
+        "name": "[parameters('storageSkuName')]"
+      },
+      "kind": "StorageV2",
+      "location": "[variables('location')]"
+    },
+    {
+      "name": "[variables('appServiceName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "kind": "app",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[parameters('appServiceSkuName')]"
+      }
+    },
+    {
+      "comments": "See for detail: https://docs.microsoft.com/en-us/azure/azure-functions/functions-infrastructure-as-code#application-insights",
+      "name": "[variables('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2015-05-01",
+      "location": "[variables('location')]",
+      "kind": "web",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('functionName'))]": "Resource"
+      },
+      "properties": {
+        "Application_Type": "web",
+        "ApplicationId": "[variables('functionName')]"
+      }
+    },
+    {
+      "name": "[variables('functionName')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "kind": "functionapp",
+      "location": "[variables('location')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServiceName'))]",
+        "siteConfig": {
+          "nodeVersion": "10.14.1",
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageName'), '2019-04-01').keys[0].value)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "node"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "10.14.1"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServiceName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+      ]
+    }
+  ],
+  "outputs": {  }
+}
