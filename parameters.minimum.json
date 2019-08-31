@@ -6,7 +6,7 @@
       "value": "Standard_LRS"
     },
     "appServiceSkuName": {
-      "value": "B1"
+      "value": "F1"
     }
   }
 }
