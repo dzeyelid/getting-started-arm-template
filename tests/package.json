@@ -1,0 +1,26 @@
+{
+  "name": "getting-started-arm-template-tests",
+  "version": "1.0.0",
+  "description": "Tests for Getting started ARM template sample",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dzeyelid/getting-started-arm-template.git"
+  },
+  "author": "Kazumi OHIRA <dzeyelid@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dzeyelid/getting-started-arm-template/issues"
+  },
+  "homepage": "https://github.com/dzeyelid/getting-started-arm-template#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "chai": "^4.2.0",
+    "content-type": "^1.0.4",
+    "mocha": "^6.2.0",
+    "qs": "^6.8.0"
+  }
+}
