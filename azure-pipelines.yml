@@ -73,4 +73,5 @@ stages:
 
     - powershell: |
         cd tests
+        npm install
         npm run test
