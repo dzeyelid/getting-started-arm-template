@@ -14,14 +14,37 @@ describe('API', () => {
   });
 
   describe('HttpTrigger', () => {
-    this.path = '/api/HttpTrigger';
+    const functionName = 'HttpTrigger';
+    this.path = `/api/${functionName}`;
 
-    before(() => {
+    before(async () => {
       this.params = {};
+
       if (process.env.SUBSCRIPTION_ID &&
           process.env.RESOURCE_GROUP_NAME &&
-          process.env.FUNCTION_NAME) {
-            // TODO: Get function key
+          process.env.FUNCTIONS_NAME) {
+            // Get function key
+            const listPublishingCredentialsUrl = `https://management.azure.com/subscriptions/${process.env.SUBSCRIPTION_ID}/resourceGroups/${process.env.RESOURCE_GROUP_NAME}/providers/Microsoft.Web/sites/${process.env.FUNCTIONS_NAME}/config/publishingcredentials/list`;
+            const listPublishingCredentialsParams = {
+              'api-version': '2016-08-01',
+            };
+            const listPublishingCredentials = await axios.post(listPublishingCredentialsUrl, null, {params: listPublishingCredentialsParams});
+            const {publishingUserName, publishingPassword} = listPublishingCredentials.data.properties;
+            
+            const base64Credential = new Buffer.from(`${publishingUserName}:${publishingPassword}`).toString('base64');
+            const getTokenUrl = `https://${process.env.FUNCTIONS_NAME}.scm.azurewebsites.net/api/functions/admin/token`;
+            const getTokenHeaders = {
+              'Authorization': `Basic ${base64Credential}`,
+            };
+            const tokenResponse = await axios.get(getTokenUrl, {headers: getTokenHeaders});
+            const token = tokenResponse.data;
+
+            const getKeysUrl = `https://${process.env.FUNCTIONS_NAME}.azurewebsites.net/admin/functions/${functionName}/keys`;
+            const getKeysHeaders = {
+              'Authorization': `Bearer ${token}`,
+            };
+            const keysResponse = await axios.get(getKeysUrl, {headers: getKeysHeaders});
+            this.params.code = keysResponse.data.keys[0].value;
           }
     });
 

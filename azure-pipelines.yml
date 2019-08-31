@@ -45,11 +45,11 @@ stages:
         $DeployOutput=$env:DeployOutput | ConvertFrom-Json
         $SUBSCRIPTION_ID=$DeployOutput.subscriptionId.value
         $RESOURCE_GROUP_NAME=$DeployOutput.resourceGroupName.value
-        $FUNCTION_NAME=$DeployOutput.functionName.value
+        $FUNCTIONS_NAME=$DeployOutput.functionName.value
         echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID"
         echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME"
-        echo "##vso[task.setvariable variable=FUNCTION_NAME]$FUNCTION_NAME"
-      displayName: 'Set variables (SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, FUNCTION_NAME)'
+        echo "##vso[task.setvariable variable=FUNCTIONS_NAME]$FUNCTIONS_NAME"
+      displayName: 'Set variables (SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, FUNCTIONS_NAME)'
 
     - task: ArchiveFiles@2
       inputs:
@@ -63,7 +63,7 @@ stages:
       inputs:
         azureSubscription: 'Connected Azure Subscription'
         appType: 'functionApp'
-        appName: $(FUNCTION_NAME)
+        appName: $(FUNCTIONS_NAME)
         package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
         deploymentMethod: 'runFromPackage'
 
