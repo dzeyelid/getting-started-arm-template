@@ -17,7 +17,7 @@ describe('API', () => {
     const functionName = 'HttpTrigger';
     this.path = `/api/${functionName}`;
 
-    before(async () => {
+    before(async (done) => {
       this.params = {};
 
       if (process.env.PUBLISHING_USER_NAME &&
@@ -43,10 +43,11 @@ describe('API', () => {
         } catch (e) {
           console.log(e);
         }
+        done();
       }
     });
 
-    it('should return name when name parameter is set', async () => {
+    it('should return name when name parameter is set', async (done) => {
       const name = 'Rock';
       const url = this.host + this.path;
       const params = {
@@ -58,9 +59,10 @@ describe('API', () => {
       assert.equal(response.status, 200);
       assert.equal(contentType.type, 'application/json');
       assert.deepEqual(response.data, {name: name});
+      done();
     });
 
-    it('should return name when name is set in data', async () => {
+    it('should return name when name is set in data', async (done) => {
       const name = 'Julia';
       const url = this.host + this.path;
       const params = {
@@ -71,9 +73,10 @@ describe('API', () => {
       assert.equal(response.status, 200);
       assert.equal(contentType.type, 'application/json');
       assert.deepEqual(response.data, {name: name});
+      done();
     });
 
-    it('should return error message when name parameter is not set', async () => {
+    it('should return error message when name parameter is not set', async (done) => {
       const url = this.host + this.path;
       const params = {
         ...this.params,
@@ -88,6 +91,7 @@ describe('API', () => {
         assert.equal(contentType.type, 'application/json');
         assert.deepEqual(response.data, {message: 'Please pass a name on the query string or in the request body'});
       }
+      done();
     });
   });
 });
