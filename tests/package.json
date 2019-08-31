@@ -4,7 +4,7 @@
   "description": "Tests for Getting started ARM template sample",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 10000"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

@@ -38,9 +38,7 @@ describe('API', () => {
           const getKeysHeaders = {
             'Authorization': `Bearer ${token}`,
           };
-          console.log(getKeysUrl);
           const keysResponse = await axios.get(getKeysUrl, {headers: getKeysHeaders});
-          console.log(keysResponse.data);
           this.params.code = keysResponse.data.keys[0].value;
         } catch (e) {
           console.log(e);
