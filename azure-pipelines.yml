@@ -23,6 +23,7 @@ stages:
     - script: |
         echo '##vso[task.setvariable variable=ProjectName]$(projectNamePrefix)-$(Build.SourceBranchName)-ci'
       displayName: 'Set ProjectName'
+
     - task: AzureResourceGroupDeployment@2
       inputs:
         azureSubscription: 'Connected Azure Subscription'
@@ -35,10 +36,15 @@ stages:
         overrideParameters: '-projectName $(ProjectName)'
         deploymentMode: 'Incremental'
         deploymentOutputs: DeployOutput
+
     - script: |
-        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID](echo $(DeployOutput) | jq \'.subscriptionId.value\')'
-        echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME](echo $(DeployOutput) | jq \'.resourceGroupName.value\')'
-        echo '##vso[task.setvariable variable=FUNCTION_NAME](echo $(DeployOutput) | jq \'.functionName.value\')'
+        SUBSCRIPTION_ID=$(echo $(DeployOutput) | jq '.subscriptionId.value')
+        RESOURCE_GROUP_NAME=$(echo $(DeployOutput) | jq '.resourceGroupName.value')
+        FUNCTION_NAME=$(echo $(DeployOutput) | jq '.functionName.value')
+        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID'
+        echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME'
+        echo '##vso[task.setvariable variable=FUNCTION_NAME]$FUNCTION_NAME'
+
     - script: |
         echo $SUBSCRIPTION_NAME
         echo $RESOURCE_GROUP_NAME
