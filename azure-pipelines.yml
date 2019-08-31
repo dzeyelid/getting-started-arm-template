@@ -45,10 +45,8 @@ stages:
 
     - powershell: |
         $DeployOutput=$env:DeployOutput | ConvertFrom-Json
-        $RESOURCE_GROUP_NAME=$DeployOutput.resourceGroupName.value
-        $FUNCTIONS_NAME=$DeployOutput.functionName.value
-        echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME"
-        echo "##vso[task.setvariable variable=FUNCTIONS_NAME]$FUNCTIONS_NAME"
+        echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$($DeployOutput.resourceGroupName.value)"
+        echo "##vso[task.setvariable variable=FUNCTIONS_NAME]$($DeployOutput.functionName.value)"
       failOnStderr: true
       displayName: 'Set variables (RESOURCE_GROUP_NAME, FUNCTIONS_NAME)'
 
@@ -75,13 +73,11 @@ stages:
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
           echo $PSVersionTable.PSVersion
-          # Get-AzWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy -OutputFile $(Build.BinariesDirectory)\credentials.xml
-          # [xml]$CRED = Get-Content -Path $(Build.BinariesDirectory)\credentials.xml
           [xml]$CRED = Get-AzWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy
           echo $CRED
           $PROFILE = $CRED.publishData.publishProfile | Where-Object -Property publishMethod -EQ MSDeploy
-          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$PROFILE.userName"
-          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$PROFILE.userPWD"
+          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$($PROFILE.userName)"
+          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$($PROFILE.userPWD)"
         failOnStandardError: true
       displayName: 'Set variables (PUBLISHING_USER_NAME, PUBLISHING_PASSWORD)'
 
