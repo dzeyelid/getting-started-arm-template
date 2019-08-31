@@ -73,6 +73,7 @@ stages:
       inputs:
         azureSubscription: 'Connected Azure Subscription'
         ScriptType: 'InlineScript'
+        azurePowerShellVersion: 'LatestVersion'
         Inline: |
           $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format "MSDeploy" | ConvertFrom-Json
           echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$CRED.userName"
