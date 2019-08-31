@@ -69,21 +69,22 @@ stages:
       inputs:
         version: 10.x
 
-    - task: AzureCLI@1
+    - task: AzurePowerShell@4
       inputs:
         azureSubscription: 'Connected Azure Subscription'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          $CRED=az webapp deployment list-publishing-profiles `
-                    --resource-group $env:RESOURCE_GROUP_NAME `
-                    --name $env:FUNCTIONS_NAME `
-                    --query "[?publishMethod == 'MSDeploy'] | [0].{userName:userName, userPWD: userPWD}" `
-                     \| ConvertFrom-Json
+        ScriptType: 'InlineScript'
+        Inline: |
+          $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format "MSDeploy" | ConvertFrom-Json
           echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$CRED.userName"
           echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$CRED.userPWD"
       displayName: 'Set variables (PUBLISHING_USER_NAME, PUBLISHING_PASSWORD)'
 
     - powershell: |
+        echo $env:PUBLISHING_USER_NAME
+        echo $env:PUBLISHING_PASSWORD
+
+    - powershell: |
         cd tests
         npm install
         npm run test
+      displayName: 'Run test'
