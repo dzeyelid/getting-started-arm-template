@@ -72,4 +72,5 @@ stages:
         version: 10.x
 
     - powershell: |
+        cd tests
         npm run test
