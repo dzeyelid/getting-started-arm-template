@@ -128,5 +128,18 @@
       ]
     }
   ],
-  "outputs": {  }
+  "outputs": {
+    "subscriptionId": {
+      "type": "string",
+      "value": "[subscription().id]"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "functionName": {
+      "type": "string",
+      "value": "[variables('functionName')]"
+    }
+  }
 }
