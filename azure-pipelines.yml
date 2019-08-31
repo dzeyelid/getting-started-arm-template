@@ -9,7 +9,7 @@ pr:
       - develop
 
 variables:
-  projectName: 'swallow'
+  projectNamePrefix: 'swallow'
 
 stages:
 - stage: Build
@@ -21,16 +21,19 @@ stages:
       location: 'Japan East'
     steps:
     - script: |
-        echo '##vso[task.setvariable variable=ResourceGroupName]$(projectName)-$(Build.SourceBranchName)'
-      displayName: 'Set ResourceGroupName'
+        echo '##vso[task.setvariable variable=ProjectName]$(projectNamePrefix)-$(Build.SourceBranchName)-ci'
+      displayName: 'Set ProjectName'
     - task: AzureResourceGroupDeployment@2
       inputs:
         azureSubscription: 'Connected Azure Subscription'
         action: 'Create Or Update Resource Group'
-        resourceGroupName: $(ResourceGroupName)
+        resourceGroupName: $(ProjectName)
         location: $(location)
         templateLocation: 'Linked artifact'
         csmFile: azuredeploy.json
         csmParametersFile: parameters.minimum.json
-        overrideParameters: '-projectName $(projectName)'
+        overrideParameters: '-projectName $(ProjectName)'
         deploymentMode: 'Incremental'
+        deploymentOutputs: DeployedOutput
+    - script: |
+        echo $(DeployedOutput)
