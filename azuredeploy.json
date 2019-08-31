@@ -25,6 +25,7 @@
     "appServiceSkuName": {
       "type": "string",
       "allowedValues": [
+        "F1",
         "D1",
         "B1",
         "B2",
