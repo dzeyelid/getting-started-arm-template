@@ -76,7 +76,8 @@ stages:
       inputs:
         azureSubscription: 'Connected Azure Subscription'
         ScriptType: 'InlineScript'
-        azurePowerShellVersion: 'LatestVersion'
+        azurePowerShellVersion: 'OtherVersion'
+        preferredAzurePowerShellVersion: '6.2.2'
         Inline: |
           echo $PSVersionTable.PSVersion
           $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy
