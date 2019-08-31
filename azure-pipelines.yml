@@ -3,32 +3,34 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-  - master
+pr:
+  branches:
+    include:
+      - develop
 
 variables:
-  system.debug: true
   projectName: 'swallow'
 
 stages:
-  - stage: Build
-    jobs:
-      - job: build_job
-        pool:
-          vmImage: 'ubuntu-latest'
-        variables:
-          resourceGroupName: 'test'
-          location: 'Japan East'
-        steps:
-        - script: echo 'Hello world!'
-        - task: AzureResourceGroupDeployment@2
-          inputs:
-            azureSubscription: 'Connected Azure Subscription'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: $(resourceGroupName)
-            location: $(location)
-            templateLocation: 'Linked artifact'
-            csmFile: azuredeploy.json
-            csmParametersFile: parameters.minimum.json
-            overrideParameters: '-projectName $(projectName)'
-            deploymentMode: 'Incremental'
+- stage: Build
+  jobs:
+  - job: build_job
+    pool:
+      vmImage: 'ubuntu-latest'
+    variables:
+      location: 'Japan East'
+    steps:
+    - script: |
+        echo '##vso[task.setvariable variable=ResourceGroupName]$(projectName)-$(Build.SourceBranchName)'
+      displayName: 'Set ResourceGroupName'
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(ResourceGroupName)
+        location: $(location)
+        templateLocation: 'Linked artifact'
+        csmFile: azuredeploy.json
+        csmParametersFile: parameters.minimum.json
+        overrideParameters: '-projectName $(projectName)'
+        deploymentMode: 'Incremental'
