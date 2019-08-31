@@ -43,13 +43,24 @@ stages:
 
     - powershell: |
         $DeployOutput=$env:DeployOutput | ConvertFrom-Json
-        $SUBSCRIPTION_ID=$DeployOutput.subscriptionId.value
         $RESOURCE_GROUP_NAME=$DeployOutput.resourceGroupName.value
         $FUNCTIONS_NAME=$DeployOutput.functionName.value
-        echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID"
         echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME"
         echo "##vso[task.setvariable variable=FUNCTIONS_NAME]$FUNCTIONS_NAME"
-      displayName: 'Set variables (SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, FUNCTIONS_NAME)'
+      displayName: 'Set variables (RESOURCE_GROUP_NAME, FUNCTIONS_NAME)'
+
+    - task: AzureCLI@1
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          $CRED=az webapp deployment list-publishing-profiles `
+                    --resource-group $env:RESOURCE_GROUP_NAME `
+                    --name $env:FUNCTIONS_NAME `
+                    --query "[?publishMethod == 'MSDeploy'] | [0].{userName:userName, userPWD: userPWD} | ConvertFrom-Json"
+          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$CRED.userName"
+          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$CRED.userPWD"
+      displayName: 'Set variables (PUBLISHING_USER_NAME, PUBLISHING_PASSWORD)'
 
     - task: ArchiveFiles@2
       inputs:

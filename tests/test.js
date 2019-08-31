@@ -5,8 +5,8 @@ const contentTypeParser = require('content-type');
 describe('API', () => {
 
   before(() => {
-    if (process.env.FUNCTION_NAME) {
-      this.host = `https://${process.env.FUNCTION_NAME}.azurewebsites.net`;
+    if (process.env.FUNCTIONS_NAME) {
+      this.host = `https://${process.env.FUNCTIONS_NAME}.azurewebsites.net`;
     }
     else {
       this.host = 'http://localhost:7071';
@@ -20,32 +20,30 @@ describe('API', () => {
     before(async () => {
       this.params = {};
 
-      if (process.env.SUBSCRIPTION_ID &&
-          process.env.RESOURCE_GROUP_NAME &&
-          process.env.FUNCTIONS_NAME) {
-            // Get function key
-            const listPublishingCredentialsUrl = `https://management.azure.com/subscriptions/${process.env.SUBSCRIPTION_ID}/resourceGroups/${process.env.RESOURCE_GROUP_NAME}/providers/Microsoft.Web/sites/${process.env.FUNCTIONS_NAME}/config/publishingcredentials/list`;
-            const listPublishingCredentialsParams = {
-              'api-version': '2016-08-01',
-            };
-            const listPublishingCredentials = await axios.post(listPublishingCredentialsUrl, null, {params: listPublishingCredentialsParams});
-            const {publishingUserName, publishingPassword} = listPublishingCredentials.data.properties;
-            
-            const base64Credential = new Buffer.from(`${publishingUserName}:${publishingPassword}`).toString('base64');
-            const getTokenUrl = `https://${process.env.FUNCTIONS_NAME}.scm.azurewebsites.net/api/functions/admin/token`;
-            const getTokenHeaders = {
-              'Authorization': `Basic ${base64Credential}`,
-            };
-            const tokenResponse = await axios.get(getTokenUrl, {headers: getTokenHeaders});
-            const token = tokenResponse.data;
-
-            const getKeysUrl = `https://${process.env.FUNCTIONS_NAME}.azurewebsites.net/admin/functions/${functionName}/keys`;
-            const getKeysHeaders = {
-              'Authorization': `Bearer ${token}`,
-            };
-            const keysResponse = await axios.get(getKeysUrl, {headers: getKeysHeaders});
-            this.params.code = keysResponse.data.keys[0].value;
-          }
+      if (process.env.PUBLISHING_USER_NAME &&
+        process.env.PUBLISHING_PASSWORD &&
+        process.env.FUNCTIONS_NAME) {
+        try {
+          // Get function key
+          const b = new Buffer.from(`${process.env.PUBLISHING_USER_NAME}:${process.env.PUBLISHING_PASSWORD}`);
+          const base64Credential = b.toString('base64');
+          const getTokenUrl = `https://${process.env.FUNCTIONS_NAME}.scm.azurewebsites.net/api/functions/admin/token`;
+          const getTokenHeaders = {
+            'Authorization': `Basic ${base64Credential}`,
+          };
+          const tokenResponse = await axios.get(getTokenUrl, {headers: getTokenHeaders});
+          const token = tokenResponse.data;
+          
+          const getKeysUrl = `https://${process.env.FUNCTIONS_NAME}.azurewebsites.net/admin/functions/${functionName}/keys`;
+          const getKeysHeaders = {
+            'Authorization': `Bearer ${token}`,
+          };
+          const keysResponse = await axios.get(getKeysUrl, {headers: getKeysHeaders});
+          this.params.code = keysResponse.data.keys[0].value;
+        } catch (e) {
+          console.log(e);
+        }
+      }
     });
 
     it('should return name when name parameter is set', async () => {
