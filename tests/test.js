@@ -25,26 +25,20 @@ describe('API', () => {
         process.env.FUNCTIONS_NAME) {
         try {
           // Get function key
-          console.log(process.env.PUBLISHING_USER_NAME);
-          console.log(process.env.PUBLISHING_PASSWORD);
           const b = new Buffer.from(`${process.env.PUBLISHING_USER_NAME}:${process.env.PUBLISHING_PASSWORD}`);
           const base64Credential = b.toString('base64');
           const getTokenUrl = `https://${process.env.FUNCTIONS_NAME}.scm.azurewebsites.net/api/functions/admin/token`;
           const getTokenHeaders = {
             'Authorization': `Basic ${base64Credential}`,
           };
-          console.log(getTokenUrl);
-          console.log(getTokenHeaders);
           const tokenResponse = await axios.get(getTokenUrl, {headers: getTokenHeaders});
           const token = tokenResponse.data;
-          console.log(token);
 
           const getKeysUrl = `https://${process.env.FUNCTIONS_NAME}.azurewebsites.net/admin/functions/${functionName}/keys`;
           const getKeysHeaders = {
             'Authorization': `Bearer ${token}`,
           };
           console.log(getKeysUrl);
-          console.log(getKeysHeaders);
           const keysResponse = await axios.get(getKeysUrl, {headers: getKeysHeaders});
           console.log(keysResponse.data);
           this.params.code = keysResponse.data.keys[0].value;
