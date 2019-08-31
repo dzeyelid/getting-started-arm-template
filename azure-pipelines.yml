@@ -80,7 +80,7 @@ stages:
         preferredAzurePowerShellVersion: '6.2.2'
         Inline: |
           echo $PSVersionTable.PSVersion
-          $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy
+          $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy -OutputFile $(Build.BinariesDirectory)\credentials.xml
           $PROFILE = $CRED.publishData.publishProfile | Where-Object -Property publishMethod -EQ MSDeploy
           echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$PROFILE.userName"
           echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$PROFILE.userPWD"
