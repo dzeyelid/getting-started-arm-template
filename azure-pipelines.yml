@@ -4,24 +4,23 @@
 # https://aka.ms/yaml
 
 trigger:
-  branches:
-    exclude:
-      - master
+  - master
 
 variables:
   system.debug: true
   projectName: 'swallow'
 
 stages:
-  - stage: Test
+  - stage: Build
     jobs:
-      - job: Test
+      - job: build_job
         pool:
           vmImage: 'ubuntu-latest'
         variables:
-          resourceGroupName: $[join($(projectName), $(Build.BuildNumber))]
+          resourceGroupName: 'test'
           location: 'Japan East'
         steps:
+        - script: echo 'Hello world!'
         - task: AzureResourceGroupDeployment@2
           inputs:
             azureSubscription: 'Connected Azure Subscription'
