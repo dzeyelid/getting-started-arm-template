@@ -9,7 +9,9 @@ trigger:
       - master
 
 variables:
+  system.debug: true
   projectName: 'swallow'
+
 stages:
   - stage: Test
     jobs:
