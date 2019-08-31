@@ -20,6 +20,7 @@ stages:
           resourceGroupName: $[join($(projectName), $(Build.BuildNumber))]
           location: 'Japan East'
         steps:
+        - script: echo 'Hello world!'
         - task: AzureResourceGroupDeployment@2
           inputs:
             azureSubscription: 'Connected Azure Subscription'
