@@ -118,7 +118,8 @@
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "10.14.1"
             }
-          ]
+          ],
+          "alwaysOn": "[if(equals(parameters('appServiceSkuName'), 'F1'), 'false', 'true')]"
         }
       },
       "dependsOn": [

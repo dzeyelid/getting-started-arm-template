@@ -37,7 +37,7 @@ stages:
         location: $(location)
         templateLocation: 'Linked artifact'
         csmFile: azuredeploy.json
-        csmParametersFile: parameters.minimum.json
+        csmParametersFile: parameters.ci.json
         overrideParameters: '-projectName $(ProjectName)'
         deploymentMode: 'Incremental'
         deploymentOutputs: DeployOutput
