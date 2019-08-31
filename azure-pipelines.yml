@@ -16,7 +16,7 @@ stages:
   jobs:
   - job: build_job
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'windows-latest'
     variables:
       location: 'Japan East'
     steps:
@@ -37,15 +37,17 @@ stages:
         deploymentMode: 'Incremental'
         deploymentOutputs: DeployOutput
 
-    - script: |
-        DEPLOY_OUTPUT_JSON=`echo $(DeployOutput | ConvertFrom-Json)`
-        SUBSCRIPTION_ID=`echo $DEPLOY_OUTPUT_JSON | jq '.subscriptionId.value'`
+    - powershell: |
+        echo $env:DeployOutput
+        $DeployOutput=$env:DeployOutput | ConvertFrom-Json
+        echo $DeployOutput
+        $SUBSCRIPTION_ID=$DeployOutput.subscriptionId.value
         echo $SUBSCRIPTION_ID
-        RESOURCE_GROUP_NAME=`echo $DEPLOY_OUTPUT_JSON | jq '.resourceGroupName.value'`
+        $RESOURCE_GROUP_NAME=$DeployOutput.resourceGroupName.value
         echo $RESOURCE_GROUP_NAME
-        FUNCTION_NAME=`echo $DEPLOY_OUTPUT_JSON | jq '.functionName.value'`
+        $FUNCTION_NAME=$DeployOutput.functionName.value
         echo $FUNCTION_NAME
-        echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID"
+        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID'
         echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME]'$(echo $RESOURCE_GROUP_NAME)
         echo "##vso[task.setvariable variable=FUNCTION_NAME]$FUNCTION_NAME"
 
