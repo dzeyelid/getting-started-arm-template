@@ -20,9 +20,16 @@ stages:
     variables:
       location: 'Japan East'
     steps:
-    - script: |
-        echo '##vso[task.setvariable variable=ProjectName]$(projectNamePrefix)-$(Build.SourceBranchName)-ci'
+    - powershell: |
+        $PROJECT_NAME="$env:PROJECT_NAME_PREFIX-$env:BRANCH_NAME-ci"
+        echo "##vso[task.setvariable variable=ProjectName]$PROJECT_NAME"
+      env:
+        PROJECT_NAME_PREFIX: $(projectNamePrefix)
+        BRANCH_NAME: $(Build.SourceBranchName)
       displayName: 'Set ProjectName'
+
+    - powershell: |
+        echo $(ProjectName)
 
     - task: AzureResourceGroupDeployment@2
       inputs:
