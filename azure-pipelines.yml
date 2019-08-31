@@ -78,9 +78,10 @@ stages:
         ScriptType: 'InlineScript'
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format "WebDeploy" | ConvertFrom-Json
-          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$CRED.userName"
-          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$CRED.userPWD"
+          $CRED = Get-AzureRMWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy
+          $PROFILE = $CRED.publishData.publishProfile | Where-Object -Property publishMethod -EQ MSDeploy
+          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$PROFILE.userName"
+          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$PROFILE.userPWD"
         failOnStandardError: true
       displayName: 'Set variables (PUBLISHING_USER_NAME, PUBLISHING_PASSWORD)'
 
