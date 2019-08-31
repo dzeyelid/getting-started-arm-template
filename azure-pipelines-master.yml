@@ -1,0 +1,95 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - master
+
+variables:
+  projectNamePrefix: 'swallow'
+
+stages:
+- stage: Build
+  jobs:
+  - job: build
+    pool:
+      vmImage: 'windows-latest'
+    variables:
+      location: 'Japan East'
+    steps:
+    - powershell: |
+        $PROJECT_NAME="$env:PROJECT_NAME_PREFIX-$env:BRANCH_NAME-ci"
+        echo "##vso[task.setvariable variable=ProjectName]$PROJECT_NAME"
+      env:
+        PROJECT_NAME_PREFIX: $(projectNamePrefix)
+        BRANCH_NAME: $(Build.SourceBranchName)
+      failOnStderr: true
+      displayName: 'Set ProjectName'
+
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: $(ProjectName)
+        location: $(location)
+        templateLocation: 'Linked artifact'
+        csmFile: azuredeploy.json
+        csmParametersFile: parameters.ci.json
+        overrideParameters: '-projectName $(ProjectName)'
+        deploymentMode: 'Incremental'
+        deploymentOutputs: DeployOutput
+        
+
+    - powershell: |
+        $DeployOutput=$env:DeployOutput | ConvertFrom-Json
+        echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$($DeployOutput.resourceGroupName.value)"
+        echo "##vso[task.setvariable variable=FUNCTIONS_NAME]$($DeployOutput.functionName.value)"
+      failOnStderr: true
+      displayName: 'Set variables (RESOURCE_GROUP_NAME, FUNCTIONS_NAME)'
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)/functions'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+
+    - task: AzureFunctionApp@1
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        appType: 'functionApp'
+        appName: $(FUNCTIONS_NAME)
+        package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        deploymentMethod: 'runFromPackage'
+
+    - task: AzurePowerShell@4
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        ScriptType: 'InlineScript'
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          [xml]$CRED = Get-AzWebAppPublishingProfile -ResourceGroupName $env:RESOURCE_GROUP_NAME -Name $env:FUNCTIONS_NAME -Format WebDeploy
+          $PROFILE = $CRED.publishData.publishProfile | Where-Object -Property publishMethod -EQ MSDeploy
+          echo "##vso[task.setvariable variable=PUBLISHING_USER_NAME]$($PROFILE.userName)"
+          echo "##vso[task.setvariable variable=PUBLISHING_PASSWORD]$($PROFILE.userPWD)"
+        failOnStandardError: true
+      displayName: 'Set variables (PUBLISHING_USER_NAME, PUBLISHING_PASSWORD)'
+
+    - task: UseNode@1
+      inputs:
+        version: 10.x
+
+    - powershell: |
+        cd tests
+        npm install
+        npm run test
+      failOnStderr: true
+      displayName: 'Run test'
+
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        action: 'DeleteRG'
+        resourceGroupName: $(RESOURCE_GROUP_NAME)
