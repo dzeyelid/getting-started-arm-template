@@ -38,17 +38,18 @@ stages:
         deploymentOutputs: DeployOutput
 
     - script: |
-        SUBSCRIPTION_ID=$(echo $DeployOutput | jq '.subscriptionId.value')
-        echo $SUBSCRIPTION_NAME
-        RESOURCE_GROUP_NAME=$(echo $DeployOutput | jq '.resourceGroupName.value')
+        echo $(DeployOutput)
+        SUBSCRIPTION_ID=`echo $(DeployOutput) | jq '.subscriptionId.value'`
+        echo $SUBSCRIPTION_ID
+        RESOURCE_GROUP_NAME=`echo $(DeployOutput) | jq '.resourceGroupName.value'`
         echo $RESOURCE_GROUP_NAME
-        FUNCTION_NAME=$(echo $DeployOutput | jq '.functionName.value')
+        FUNCTION_NAME=`echo $(DeployOutput) | jq '.functionName.value'`
         echo $FUNCTION_NAME
-        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID'
-        echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME'
-        echo '##vso[task.setvariable variable=FUNCTION_NAME]$FUNCTION_NAME'
+        echo '##vso[task.setvariable variable=SUBSCRIPTION_ID]echo $SUBSCRIPTION_ID'
+        echo '##vso[task.setvariable variable=RESOURCE_GROUP_NAME]echo $RESOURCE_GROUP_NAME'
+        echo '##vso[task.setvariable variable=FUNCTION_NAME]echo $FUNCTION_NAME'
 
     - script: |
-        echo $SUBSCRIPTION_NAME
+        echo $SUBSCRIPTION_ID
         echo $RESOURCE_GROUP_NAME
         echo $FUNCTION_NAME
