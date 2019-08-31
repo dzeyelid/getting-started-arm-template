@@ -89,3 +89,9 @@ stages:
         npm run test
       failOnStderr: true
       displayName: 'Run test'
+
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: 'Connected Azure Subscription'
+        action: 'DeleteRG'
+        resourceGroupName: $(RESOURCE_GROUP_NAME)
