@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentParameters.json#",
+  "contentVersion": "0.0.1.0",
+  "parameters": {
+    "storageSkuName": {
+      "value": "Standard_LRS"
+    },
+    "appServiceSkuName": {
+      "value": "B1"
+    }
+  }
+}
