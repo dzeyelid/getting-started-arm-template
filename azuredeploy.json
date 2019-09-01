@@ -118,7 +118,8 @@
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "10.14.1"
             }
-          ]
+          ],
+          "alwaysOn": "[if(equals(parameters('appServiceSkuName'), 'F1'), 'false', 'true')]"
         }
       },
       "dependsOn": [
@@ -128,5 +129,14 @@
       ]
     }
   ],
-  "outputs": {  }
+  "outputs": {
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "functionName": {
+      "type": "string",
+      "value": "[variables('functionName')]"
+    }
+  }
 }
